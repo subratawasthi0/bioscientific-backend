@@ -1,0 +1,42 @@
+{
+  "name": "biosciences-dev",
+  "version": "1.0.0",
+  "description": "Backend of crest bioscientific website",
+  "keywords": [
+    "Backend"
+  ],
+  "homepage": "https://github.com/anjalisri98/biosciences-dev#readme",
+  "bugs": {
+    "url": "https://github.com/anjalisri98/biosciences-dev/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anjalisri98/biosciences-dev.git"
+  },
+  "license": "ISC",
+  "author": "Anjali Srivastava",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1110.0",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "csv-parser": "^3.2.1",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-validator": "^7.3.2",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.9.2",
+    "multer": "^2.2.0",
+    "multer-s3": "^3.0.1",
+    "slugify": "^1.6.9",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
