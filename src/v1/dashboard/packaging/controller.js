@@ -1,6 +1,6 @@
 const packagingService = require("./service");
 const { sendSuccess, sendError } = require("../../../utils/responseHandler");
-const messages = require("../../../utils/responsemessages");
+const messages = require("../../../utils/responseMessages");
 
 exports.listPackagings = async (req, res) => {
   try {

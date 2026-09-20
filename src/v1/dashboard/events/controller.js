@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const eventService = require("./service");
 const { sendSuccess, sendError } = require("../../../utils/responseHandler");
-const messages = require("../../../utils/responsemessages");
+const messages = require("../../../utils/responseMessages");
 
 // Safe delete helper that handles local and remote files (Crash-Proof)
 const deleteFileFromDisk = (filePath) => {

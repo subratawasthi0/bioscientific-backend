@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const catalogueService = require("./service");
 const { sendSuccess, sendError } = require("../../../utils/responseHandler");
-const messages = require("../../../utils/responsemessages");
+const messages = require("../../../utils/responseMessages");
 
 // Safe delete helper that doesn't crash on missing files or remote URLs
 const deleteFileFromDisk = (filePath) => {

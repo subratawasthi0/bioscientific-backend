@@ -1,6 +1,6 @@
 const userService = require("./service");
 const { sendSuccess, sendError } = require("../../../utils/responseHandler");
-const messages = require("../../../utils/responsemessages");
+const messages = require("../../../utils/responseMessages");
 const jwt = require("jsonwebtoken");
 
 const registerAdmin = async (req, res) => {

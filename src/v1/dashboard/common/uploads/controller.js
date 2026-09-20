@@ -1,7 +1,7 @@
 // src/v1/common/uploads/controller.js
 const uploadService = require("./service"); // Import the service above
 const { sendSuccess, sendError } = require("../../../../utils/responseHandler");
-const messages = require("../../../../utils/responsemessages");
+const messages = require("../../../../utils/responseMessages");
 
 exports.uploadFile = async (req, res) => {
   try {

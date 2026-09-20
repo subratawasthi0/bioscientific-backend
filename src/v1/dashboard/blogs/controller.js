@@ -1,6 +1,6 @@
 const blogService = require("./service");
 const { sendSuccess, sendError } = require("../../../utils/responseHandler");
-const messages = require("../../../utils/responsemessages"); // If you want to use centralized messages
+const messages = require("../../../utils/responseMessages"); // If you want to use centralized messages
 
 exports.listBlogs = async (req, res) => {
   try {

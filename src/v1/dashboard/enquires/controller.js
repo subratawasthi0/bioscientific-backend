@@ -1,6 +1,6 @@
 const enquiryService = require("./service");
 const { sendSuccess, sendError } = require("../../../utils/responseHandler");
-const messages = require("../../../utils/responsemessages");
+const messages = require("../../../utils/responseMessages");
 
 exports.listEnquiries = async (req, res) => {
   try {
