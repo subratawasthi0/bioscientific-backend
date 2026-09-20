@@ -1,6 +1,6 @@
 const productService = require("./service");
 const { sendSuccess, sendError } = require("../../../utils/responseHandler");
-const messages = require("../../../utils/responsemessages"); // Import messages
+const messages = require("../../../utils/responseMessages"); // Import messages
 
 exports.listProducts = async (req, res) => {
   try {
