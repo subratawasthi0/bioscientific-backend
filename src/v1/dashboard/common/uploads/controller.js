@@ -8,12 +8,14 @@ exports.uploadFile = async (req, res) => {
     // Actually call the service
     const file = await uploadService.uploadFileToS3(req);
 
-    // If we reach here, the upload to AWS S3 was successful!
+    const publicBaseUrl = process.env.MINIO_PUBLIC_URL.replace(/\/+$/, "");
+    const bucket = process.env.MINIO_BUCKET;
+
     sendSuccess(
       res,
       {
-        url: file.location, // The direct S3 public URL
-        key: file.key, // The path/filename in S3 (e.g., events/12345.jpg)
+        url: `${publicBaseUrl}/${bucket}/${file.key}`,
+        key: file.key,
         originalName: file.originalname,
         size: file.size,
         mimeType: file.mimetype,
