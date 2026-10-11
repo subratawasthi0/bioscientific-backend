@@ -8,7 +8,6 @@ const {
 const validateResult = require("../../../utils/validationResultHandler");
 
 router.get("/list", controller.listCatalogues);
-router.get("/:id", controller.getCatalogue);
 
 router.post(
   "/add",
@@ -16,6 +15,9 @@ router.post(
   validateResult,
   controller.addCatalogue,
 );
+
+router.get("/:id", controller.getCatalogue);
+
 router.put(
   "/update/:id",
   updateCatalogueValidation,
