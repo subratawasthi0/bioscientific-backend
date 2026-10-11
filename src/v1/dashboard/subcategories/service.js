@@ -1,6 +1,6 @@
 
-const SubCategory = require("../../db/models/SubCategory");
-const Category = require("../../db/models/Category");
+const SubCategory = require("../../../db/models/SubCategory");
+const Category = require("../../../db/models/Category");
 const mongoose = require("mongoose");
 
 const makeSlug = (value) =>

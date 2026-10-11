@@ -4,7 +4,7 @@ const subCategoryService = require("./service");
 const {
   sendSuccess,
   sendError,
-} = require("../../utils/responseHandler");
+} = require("../../../utils/responseHandler");
 
 exports.listSubCategories = async (req, res) => {
   try {

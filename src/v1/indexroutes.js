@@ -9,7 +9,7 @@ const uploadRoutes = require("./dashboard/common/uploads/route");
 const userRoutes = require("./dashboard/users/route");
 const blogRoutes = require("./dashboard/blogs/route");
 const categoryRoutes = require("./dashboard/categories/route");
-const subCategoryRoutes = require("./subcategories/route");
+const subCategoryRoutes = require("./dashboard/subcategories/route");
 
 router.use("/dashboard/products", productRoutes);
 router.use("/dashboard/packagings", packagingRoutes);
