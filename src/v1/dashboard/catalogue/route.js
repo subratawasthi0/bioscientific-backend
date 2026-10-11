@@ -16,7 +16,6 @@ router.post(
   controller.addCatalogue,
 );
 
-router.get("/:id", controller.getCatalogue);
 
 router.put(
   "/update/:id",
@@ -24,6 +23,9 @@ router.put(
   validateResult,
   controller.editCatalogue,
 );
+
+router.get("/details/:id", controller.getCatalogue);
+
 router.delete("/:id", controller.removeCatalogue);
 
 module.exports = router;
