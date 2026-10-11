@@ -1,9 +1,6 @@
 const productService = require("./service");
 
-const {
-  sendSuccess,
-  sendError,
-} = require("../../../utils/responseHandler");
+const { sendSuccess, sendError } = require("../../../utils/responseHandler");
 
 const messages = require("../../../utils/responseMessages");
 
@@ -13,7 +10,9 @@ const messages = require("../../../utils/responseMessages");
 
 exports.listProducts = async (req, res) => {
   try {
-    const result = await productService.getAllProducts();
+    const { page = 1, limit = 50 } = req.query;
+
+    const result = await productService.getAllProducts(page, limit);
 
     if (!result.success) {
       return sendError(res, result.error);
@@ -31,20 +30,14 @@ exports.listProducts = async (req, res) => {
 
 exports.getProduct = async (req, res) => {
   try {
-    const result = await productService.getProductById(
-      req.params.id
-    );
+    const result = await productService.getProductById(req.params.id);
 
     if (!result.success) {
       return sendError(res, result.error);
     }
 
     if (!result.data) {
-      return sendError(
-        res,
-        messages.PRODUCT_NOT_FOUND,
-        404
-      );
+      return sendError(res, messages.PRODUCT_NOT_FOUND, 404);
     }
 
     return sendSuccess(res, result.data);
@@ -59,20 +52,13 @@ exports.getProduct = async (req, res) => {
 
 exports.addProduct = async (req, res) => {
   try {
-    const result = await productService.createProduct(
-      req.body
-    );
+    const result = await productService.createProduct(req.body);
 
     if (!result.success) {
       return sendError(res, result.error);
     }
 
-    return sendSuccess(
-      res,
-      result.data,
-      messages.PRODUCT_CREATED,
-      201
-    );
+    return sendSuccess(res, result.data, messages.PRODUCT_CREATED, 201);
   } catch (err) {
     return sendError(res, err.message);
   }
@@ -84,28 +70,17 @@ exports.addProduct = async (req, res) => {
 
 exports.editProduct = async (req, res) => {
   try {
-    const result = await productService.updateProduct(
-      req.params.id,
-      req.body
-    );
+    const result = await productService.updateProduct(req.params.id, req.body);
 
     if (!result.success) {
       return sendError(res, result.error);
     }
 
     if (!result.data) {
-      return sendError(
-        res,
-        messages.PRODUCT_NOT_FOUND,
-        404
-      );
+      return sendError(res, messages.PRODUCT_NOT_FOUND, 404);
     }
 
-    return sendSuccess(
-      res,
-      result.data,
-      messages.PRODUCT_UPDATED
-    );
+    return sendSuccess(res, result.data, messages.PRODUCT_UPDATED);
   } catch (err) {
     return sendError(res, err.message);
   }
@@ -117,27 +92,17 @@ exports.editProduct = async (req, res) => {
 
 exports.deleteProduct = async (req, res) => {
   try {
-    const result = await productService.deleteProduct(
-      req.params.id
-    );
+    const result = await productService.deleteProduct(req.params.id);
 
     if (!result.success) {
       return sendError(res, result.error);
     }
 
     if (!result.data) {
-      return sendError(
-        res,
-        messages.PRODUCT_NOT_FOUND,
-        404
-      );
+      return sendError(res, messages.PRODUCT_NOT_FOUND, 404);
     }
 
-    return sendSuccess(
-      res,
-      null,
-      messages.PRODUCT_DELETED
-    );
+    return sendSuccess(res, null, messages.PRODUCT_DELETED);
   } catch (err) {
     return sendError(res, err.message);
   }
@@ -163,12 +128,7 @@ exports.bulkUpload = async (req, res) => {
       });
     }
 
-    return sendSuccess(
-      res,
-      result.data,
-      messages.BULK_UPLOAD_SUCCESS,
-      201
-    );
+    return sendSuccess(res, result.data, messages.BULK_UPLOAD_SUCCESS, 201);
   } catch (err) {
     console.error("Bulk upload controller error:", err);
     return sendError(res, err.message);
