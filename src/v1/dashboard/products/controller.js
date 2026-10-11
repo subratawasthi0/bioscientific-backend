@@ -18,11 +18,15 @@ exports.listProducts = async (req, res) => {
       return sendError(res, result.error);
     }
 
-    return sendSuccess(res, result.data);
+    return sendSuccess(res, {
+      products: result.data,
+      pagination: result.pagination,
+    });
   } catch (err) {
     return sendError(res, err.message);
   }
 };
+
 
 // ==========================================
 // GET PRODUCT BY ID
