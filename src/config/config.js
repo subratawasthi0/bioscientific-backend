@@ -2,7 +2,7 @@ require('dotenv').config();
 
 module.exports = {
   port: process.env.PORT || 5000,
-  mongoUri: process.env.MONGO_URI || 'mongodb://localhost:27017/chemical_db',
+  mongoUri: process.env.MONGODB_URI,
   AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID || 'your_access_key_here',
   AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY || 'your_secret_key_here',
   AWS_REGION: process.env.AWS_REGION || 'us-east-1',

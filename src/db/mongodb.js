@@ -20,8 +20,10 @@ const uri = config.mongoUri;
 
 
 const connectDB = async () => {
+  console.log("----------====================================")
   try {
-    await mongoose.connect("mongodb+srv://komalsri0_db_user:CChNxSm9afXpgizy@crest-bio.bfsri1k.mongodb.net/anjali?retryWrites=true&w=majority", {
+    console.log(config.mongoUri,"------------------------------------------------")
+    await mongoose.connect(config.mongoUri, {
       family: 4, // Force IPv4 - IMPORTANT for Windows!
       serverSelectionTimeoutMS: 5000, // Timeout after 5 seconds
     });

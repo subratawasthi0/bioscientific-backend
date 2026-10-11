@@ -8,6 +8,8 @@ const enquiryRoutes = require("./dashboard/enquires/route");
 const uploadRoutes = require("./dashboard/common/uploads/route");
 const userRoutes = require("./dashboard/users/route");
 const blogRoutes = require("./dashboard/blogs/route");
+const categoryRoutes = require("./dashboard/categories/route");
+const subCategoryRoutes = require("./subcategories/route");
 
 router.use("/dashboard/products", productRoutes);
 router.use("/dashboard/packagings", packagingRoutes);
@@ -17,6 +19,7 @@ router.use("/dashboard/enquiries", enquiryRoutes);
 router.use("/dashboard/common", uploadRoutes);
 router.use("/dashboard/users", userRoutes);
 router.use("/dashboard/blogs", blogRoutes);
-
+router.use("/dashboard/categories", categoryRoutes);
+router.use("/dashboard/subcategories", subCategoryRoutes);
 
 module.exports = router;
