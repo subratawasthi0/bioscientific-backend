@@ -17,25 +17,41 @@ const path = require("path");
 // ==========================================
 // LIST ALL PRODUCTS
 // ==========================================
-
-const getAllProducts = async () => {
+const getAllProducts = async (page = 1, limit = 50) => {
   try {
-    const data = await Product.find()
-      .populate({
-        path: "primaryCategory",
-        select: "name slug",
-      })
-      .populate({
-        path: "secondaryCategory",
-        select: "name slug category",
-      })
-      .sort({
-        createdAt: -1,
-      });
+    page = Math.max(1, Number(page) || 1);
+    limit = Math.min(50, Math.max(1, Number(limit) || 50));
+
+    const skip = (page - 1) * limit;
+
+    const [data, totalProducts] = await Promise.all([
+      Product.find()
+        .populate({
+          path: "primaryCategory",
+          select: "name slug",
+        })
+        .populate({
+          path: "secondaryCategory",
+          select: "name slug category",
+        })
+        .sort({
+          createdAt: -1,
+        })
+        .skip(skip)
+        .limit(limit),
+
+      Product.countDocuments(),
+    ]);
 
     return {
       success: true,
       data,
+      pagination: {
+        currentPage: page,
+        limit,
+        totalProducts,
+        totalPages: Math.ceil(totalProducts / limit),
+      },
     };
   } catch (err) {
     return {
@@ -44,6 +60,7 @@ const getAllProducts = async () => {
     };
   }
 };
+
 
 // ==========================================
 // GET PRODUCT BY ID
