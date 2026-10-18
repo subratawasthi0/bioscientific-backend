@@ -7,6 +7,7 @@ const SubCategory = require("../../../db/models/SubCategory");
 const csv = require("csv-parser");
 
 const xlsx = require("xlsx");
+const mongoose = require("mongoose");
 
 const fs = require("fs");
 const { GetObjectCommand } = require("@aws-sdk/client-s3");
@@ -18,7 +19,13 @@ const path = require("path");
 // LIST ALL PRODUCTS
 // ==========================================
 
-const getAllProducts = async (page, limit, search = "") => {
+const getAllProducts = async (
+  page,
+  limit,
+  search = "",
+  categoryId = "",
+  subCategoryId = ""
+) => {
   try {
     // Do not reassign the incoming parameters
     const currentPage = Math.max(1, Number(page) || 1);
@@ -41,12 +48,39 @@ const getAllProducts = async (page, limit, search = "") => {
         }
       : {};
 
+      // Combine search, category, and subcategory filters
+const productFilter = { ...searchFilter };
+
+if (categoryId) {
+  if (!mongoose.Types.ObjectId.isValid(categoryId)) {
+    return {
+      success: false,
+      error: "Invalid category ID",
+    };
+  }
+
+  productFilter.primaryCategory =
+    new mongoose.Types.ObjectId(categoryId);
+}
+
+if (subCategoryId) {
+  if (!mongoose.Types.ObjectId.isValid(subCategoryId)) {
+    return {
+      success: false,
+      error: "Invalid subcategory ID",
+    };
+  }
+
+  productFilter.secondaryCategory =
+    new mongoose.Types.ObjectId(subCategoryId);
+}
     // Count only matching products, across the entire collection
-    const totalProducts = await Product.countDocuments(searchFilter);
+   const totalProducts =
+  await Product.countDocuments(productFilter);
 
     const products = await Product.aggregate([
       // Search BEFORE sorting and pagination
-      { $match: searchFilter },
+      { $match: productFilter },
 
       // Convert CB001, CB002... into numbers for correct sorting
       {

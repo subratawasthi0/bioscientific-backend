@@ -8,13 +8,35 @@ const messages = require("../../../utils/responseMessages");
 // LIST PRODUCTS
 // ==========================================
 
+
 exports.listProducts = async (req, res) => {
   try {
-    const { page = 1, limit = 50, search = "" } = req.query;
+    const {
+      page = 1,
+      limit = 50,
+      search = "",
+    } = req.query;
 
-    const result = await productService.getAllProducts(page, limit, search);
+    // Support the frontend's category/subcategory query parameters
+    const categoryId =
+      req.query.categoryId || req.query.category || "";
+
+    const subCategoryId =
+      req.query.subCategoryId ||
+      req.query.subcategoryId ||
+      req.query.subCategory ||
+      "";
+
+    const result = await productService.getAllProducts(
+      page,
+      limit,
+      search,
+      categoryId,
+      subCategoryId
+    );
+
     if (!result.success) {
-      return sendError(res, result.error);
+      return sendError(res, result.error || result.message);
     }
 
     return sendSuccess(res, {
@@ -22,9 +44,11 @@ exports.listProducts = async (req, res) => {
       pagination: result.pagination,
     });
   } catch (err) {
+    console.error("listProducts error:", err);
     return sendError(res, err.message);
   }
 };
+
 
 // ==========================================
 // GET PRODUCT BY ID
