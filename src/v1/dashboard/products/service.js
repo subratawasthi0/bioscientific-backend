@@ -17,50 +17,153 @@ const path = require("path");
 // ==========================================
 // LIST ALL PRODUCTS
 // ==========================================
-const getAllProducts = async (page = 1, limit = 50) => {
+
+const getAllProducts = async (page, limit, search = "") => {
   try {
-    page = Math.max(1, Number(page) || 1);
-    limit = Math.min(50, Math.max(1, Number(limit) || 50));
+    // Do not reassign the incoming parameters
+    const currentPage = Math.max(1, Number(page) || 1);
+    const pageLimit = Math.max(1, Math.min(100, Number(limit) || 50));
+    const skip = (currentPage - 1) * pageLimit;
 
-    const skip = (page - 1) * limit;
+    const searchText = String(search || "").trim();
 
-    const [data, totalProducts] = await Promise.all([
-      Product.find()
-        .populate({
-          path: "primaryCategory",
-          select: "name slug",
-        })
-        .populate({
-          path: "secondaryCategory",
-          select: "name slug category",
-        })
-        .sort({
-          createdAt: -1,
-        })
-        .skip(skip)
-        .limit(limit),
+    // Escape regex special characters so search is treated literally
+    const escapedSearch = searchText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-      Product.countDocuments(),
+    const searchFilter = escapedSearch
+      ? {
+          $or: [
+            { productName: { $regex: escapedSearch, $options: "i" } },
+            { catNo: { $regex: escapedSearch, $options: "i" } },
+            { cas: { $regex: escapedSearch, $options: "i" } },
+            { hsn: { $regex: escapedSearch, $options: "i" } },
+          ],
+        }
+      : {};
+
+    // Count only matching products, across the entire collection
+    const totalProducts = await Product.countDocuments(searchFilter);
+
+    const products = await Product.aggregate([
+      // Search BEFORE sorting and pagination
+      { $match: searchFilter },
+
+      // Convert CB001, CB002... into numbers for correct sorting
+      {
+        $addFields: {
+          catNoNumber: {
+            $convert: {
+              input: {
+                $arrayElemAt: [
+                  {
+                    $split: [{ $ifNull: ["$catNo", ""] }, "CB"],
+                  },
+                  1,
+                ],
+              },
+              to: "int",
+              onError: 999999999,
+              onNull: 999999999,
+            },
+          },
+        },
+      },
+
+      { $sort: { catNoNumber: 1, _id: 1 } },
+
+      // Paginate the matching results
+      { $skip: skip },
+      { $limit: pageLimit },
+
+      // Populate primary category
+      {
+        $lookup: {
+          from: "categories",
+          localField: "primaryCategory",
+          foreignField: "_id",
+          as: "primaryCategoryData",
+        },
+      },
+      {
+        $unwind: {
+          path: "$primaryCategoryData",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+
+      // Populate secondary category
+      {
+        $lookup: {
+          from: "subcategories",
+          localField: "secondaryCategory",
+          foreignField: "_id",
+          as: "secondaryCategoryData",
+        },
+      },
+      {
+        $unwind: {
+          path: "$secondaryCategoryData",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+
+      // Return category and subcategory name and slug
+      {
+        $addFields: {
+          primaryCategory: {
+            $cond: [
+              { $ne: ["$primaryCategoryData", null] },
+              {
+                _id: "$primaryCategoryData._id",
+                name: "$primaryCategoryData.name",
+                slug: "$primaryCategoryData.slug",
+              },
+              null,
+            ],
+          },
+          secondaryCategory: {
+            $cond: [
+              { $ne: ["$secondaryCategoryData", null] },
+              {
+                _id: "$secondaryCategoryData._id",
+                name: "$secondaryCategoryData.name",
+                slug: "$secondaryCategoryData.slug",
+              },
+              null,
+            ],
+          },
+        },
+      },
+
+      // Remove temporary fields
+      {
+        $project: {
+          catNoNumber: 0,
+          primaryCategoryData: 0,
+          secondaryCategoryData: 0,
+        },
+      },
     ]);
 
     return {
       success: true,
-      data,
+      data: products,
       pagination: {
-        currentPage: page,
-        limit,
+        currentPage,
+        limit: pageLimit,
         totalProducts,
-        totalPages: Math.ceil(totalProducts / limit),
+        totalPages: Math.ceil(totalProducts / pageLimit),
       },
     };
   } catch (err) {
+    console.error("getAllProducts error:", err);
+
     return {
       success: false,
-      error: err.message,
+      message: err.message,
     };
   }
 };
-
 
 // ==========================================
 // GET PRODUCT BY ID
@@ -133,7 +236,7 @@ const createProduct = async (data) => {
       category: data.primaryCategory,
     });
 
-    console.log(category, subCategory,"---------cat sub cat ")
+    console.log(category, subCategory, "---------cat sub cat ");
     if (!subCategory) {
       return {
         success: false,
@@ -302,7 +405,6 @@ const deleteProduct = async (id) => {
 // BULK UPLOAD
 // ==========================================
 
-
 const bulkUploadProducts = async (file) => {
   try {
     // 1. Validate uploaded file
@@ -327,7 +429,7 @@ const bulkUploadProducts = async (file) => {
       new GetObjectCommand({
         Bucket: file.bucket,
         Key: file.key,
-      })
+      }),
     );
 
     if (!response.Body) {
@@ -404,8 +506,7 @@ const bulkUploadProducts = async (file) => {
     };
 
     // Escape special regex characters
-    const escapeRegex = (value) =>
-      value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
     // 5. Validate each row
     for (let i = 0; i < rows.length; i++) {
@@ -418,7 +519,7 @@ const bulkUploadProducts = async (file) => {
       const hsn = String(row["hsn"] ?? "").trim();
       const categoryName = String(row["category"] ?? "").trim();
       const subCategoryName = String(
-        row["sub category"] ?? row["subcategory"] ?? ""
+        row["sub category"] ?? row["subcategory"] ?? "",
       ).trim();
 
       const packSizes = String(row["pack sizes"] ?? "")
@@ -454,7 +555,7 @@ const bulkUploadProducts = async (file) => {
             rowNumber,
             "Cat No",
             catNo,
-            "Duplicate Cat No found in the uploaded file"
+            "Duplicate Cat No found in the uploaded file",
           );
           rowHasError = true;
         } else {
@@ -485,7 +586,7 @@ const bulkUploadProducts = async (file) => {
             rowNumber,
             "Category",
             categoryName,
-            `Category "${categoryName}" does not exist`
+            `Category "${categoryName}" does not exist`,
           );
           continue;
         }
@@ -495,8 +596,7 @@ const bulkUploadProducts = async (file) => {
       }
 
       // 7. Find subcategory under the selected category
-      const subKey =
-        `${String(categoryId)}:${subCategoryName.toLowerCase()}`;
+      const subKey = `${String(categoryId)}:${subCategoryName.toLowerCase()}`;
 
       let subCategoryId = subCategoryCache.get(subKey);
 
@@ -515,7 +615,7 @@ const bulkUploadProducts = async (file) => {
             rowNumber,
             "Sub Category",
             subCategoryName,
-            `Subcategory "${subCategoryName}" does not exist under category "${categoryName}"`
+            `Subcategory "${subCategoryName}" does not exist under category "${categoryName}"`,
           );
           continue;
         }
@@ -563,7 +663,7 @@ const bulkUploadProducts = async (file) => {
 
     if (existingProducts.length > 0) {
       const existingCodes = new Set(
-        existingProducts.map((product) => product.catNo.toLowerCase())
+        existingProducts.map((product) => product.catNo.toLowerCase()),
       );
 
       const duplicateErrors = products
@@ -571,9 +671,7 @@ const bulkUploadProducts = async (file) => {
           product,
           row: index + 2,
         }))
-        .filter(({ product }) =>
-          existingCodes.has(product.catNo.toLowerCase())
-        )
+        .filter(({ product }) => existingCodes.has(product.catNo.toLowerCase()))
         .map(({ product, row }) => ({
           row,
           catNo: product.catNo,
@@ -612,7 +710,6 @@ const bulkUploadProducts = async (file) => {
     };
   }
 };
-
 
 // ==========================================
 // EXPORT

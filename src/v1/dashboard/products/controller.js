@@ -10,10 +10,9 @@ const messages = require("../../../utils/responseMessages");
 
 exports.listProducts = async (req, res) => {
   try {
-    const { page = 1, limit = 50 } = req.query;
+    const { page = 1, limit = 50, search = "" } = req.query;
 
-    const result = await productService.getAllProducts(page, limit);
-
+    const result = await productService.getAllProducts(page, limit, search);
     if (!result.success) {
       return sendError(res, result.error);
     }
@@ -26,7 +25,6 @@ exports.listProducts = async (req, res) => {
     return sendError(res, err.message);
   }
 };
-
 
 // ==========================================
 // GET PRODUCT BY ID
