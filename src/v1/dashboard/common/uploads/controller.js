@@ -5,17 +5,20 @@ const messages = require("../../../../utils/responseMessages");
 
 exports.uploadFile = async (req, res) => {
   try {
-    // Actually call the service
     const file = await uploadService.uploadFileToS3(req);
 
-    const publicBaseUrl = process.env.MINIO_PUBLIC_URL.replace(/\/+$/, "");
+    const publicBaseUrl = (
+      process.env.MINIO_PUBLIC_URL || "https://crestbioscientific.com"
+    ).replace(/\/+$/, "");
+
     const bucket = process.env.MINIO_BUCKET;
+    const key = file.key;
 
     sendSuccess(
       res,
       {
-        url: `${publicBaseUrl}/${bucket}/${file.key}`,
-        key: file.key,
+        url: `${publicBaseUrl}/${bucket}/${key}`,
+        key: key,
         originalName: file.originalname,
         size: file.size,
         mimeType: file.mimetype,
